@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from src.db.database import get_db
 from src.models.voucher import Voucher
@@ -18,7 +18,12 @@ def home(request: Request):
 
 @router.get("/print/{voucher_id}", response_class=HTMLResponse)
 def print_voucher(voucher_id: int, request: Request, db: Session = Depends(get_db)):
-    voucher = db.query(Voucher).filter(Voucher.id == voucher_id).first()
+    voucher = (
+        db.query(Voucher)
+        .options(joinedload(Voucher.vehicle))
+        .filter(Voucher.id == voucher_id)
+        .first()
+    )
     if not voucher:
         raise HTTPException(status_code=404, detail="Vale no encontrado")
     return templates.TemplateResponse(

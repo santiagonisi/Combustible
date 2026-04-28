@@ -3,48 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Impresion de Vale</title>
+    <title>Vale de Combustible - {{ voucher.serial_number }}</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 0; padding: 18px; color: #111827; }
-        .print-actions { margin-bottom: 16px; }
-        .print-actions button { padding: 8px 14px; border: 1px solid #1f2937; background: #fff; cursor: pointer; }
-        .voucher-copy { border: 2px solid #111827; margin-bottom: 20px; padding: 12px; }
-        .voucher-copy h1 { margin: 0 0 10px; font-size: 18px; }
-        .copy-label { font-size: 12px; font-weight: bold; margin-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
-        .row { border-bottom: 1px solid #d1d5db; padding-bottom: 4px; }
-        .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 28px; }
-        .signature-box { border-top: 1px solid #111827; padding-top: 6px; font-size: 12px; text-align: center; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 11px;
+            color: #111;
+            background: #fff;
+            padding: 14px;
+        }
+
+        /* Boton imprimir (se oculta al imprimir) */
+        .print-actions { margin-bottom: 14px; }
+        .print-actions button {
+            padding: 8px 20px;
+            background: #e3c019;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        /* Contenedor de cada copia */
+        .voucher-copy {
+            border: 1.5px solid #222;
+            padding: 8px 10px 10px 10px;
+            margin-bottom: 16px;
+            width: 100%;
+            max-width: 700px;
+        }
+
+        /* ── CABECERA ── */
+        .voucher-header {
+            display: flex;
+            align-items: center;
+            border-bottom: 2px solid #222;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+            gap: 8px;
+        }
+        .logo-area {
+            width: 90px;
+            min-width: 90px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .logo-area img { max-width: 100%; max-height: 100%; }
+        .logo-placeholder {
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 2px;
+            color: #111;
+            border: 2px solid #111;
+            padding: 4px 8px;
+        }
+        .title-area {
+            flex: 1;
+            text-align: center;
+        }
+        .title-area h1 {
+            font-size: 18px;
+            font-weight: 900;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .serial-area {
+            text-align: right;
+            font-weight: bold;
+            font-size: 13px;
+            white-space: nowrap;
+            min-width: 100px;
+        }
+
+        /* ── OBRA / FECHA ── */
+        .obra-row {
+            display: flex;
+            gap: 30px;
+            padding: 5px 0 6px 0;
+            border-bottom: 1px solid #bbb;
+            margin-bottom: 7px;
+        }
+        .obra-row .lbl { font-weight: bold; margin-right: 4px; }
+        .obra-row .val {
+            border-bottom: 1px solid #555;
+            display: inline-block;
+            min-width: 140px;
+            padding-bottom: 1px;
+        }
+
+        /* ── TABLA COMBUSTIBLE ── */
+        .fuel-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 7px;
+            font-size: 11px;
+        }
+        .fuel-table th {
+            background: #222;
+            color: #fff;
+            padding: 4px 10px;
+            text-align: center;
+            font-size: 10.5px;
+            letter-spacing: 0.5px;
+        }
+        .fuel-table td {
+            border: 1px solid #888;
+            padding: 3px 10px;
+            text-align: center;
+        }
+        .fuel-table td:first-child { text-align: left; }
+        .fuel-table tr.active-fuel td { font-weight: bold; }
+        .fuel-table tr.total-row td {
+            border-top: 2px solid #222;
+            font-weight: bold;
+            text-align: right;
+            padding-right: 12px;
+        }
+        .fuel-table tr.total-row td:first-child,
+        .fuel-table tr.total-row td:nth-child(2) { border: 1px solid #888; }
+
+        /* ── TEXTO VALIDEZ (solo original) ── */
+        .valid-text {
+            color: #c00;
+            font-weight: bold;
+            font-size: 10px;
+            font-style: italic;
+            margin-bottom: 6px;
+        }
+
+        /* ── CAMPOS INFERIORES ── */
+        .footer-line {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 9px;
+            gap: 6px;
+        }
+        .footer-line .lbl { font-weight: bold; white-space: nowrap; }
+        .footer-line .val {
+            border-bottom: 1px solid #555;
+            flex: 1;
+            min-height: 14px;
+            padding-bottom: 1px;
+        }
+
+        .footer-bottom {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 10px;
+            margin-top: 4px;
+        }
+        .footer-bottom .left {
+            display: flex;
+            gap: 20px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+        }
+        .footer-bottom .footer-line { margin-bottom: 0; }
+
+        .signature-label {
+            font-size: 10px;
+            font-style: italic;
+            border-top: 1px solid #555;
+            padding-top: 3px;
+            text-align: center;
+            min-width: 160px;
+            white-space: nowrap;
+        }
+
+        /* ── PRINT ── */
         @media print {
             .print-actions { display: none; }
-            .voucher-copy { page-break-inside: avoid; }
+            body { padding: 4px; }
+            .voucher-copy { page-break-inside: avoid; margin-bottom: 10px; }
         }
     </style>
 </head>
 <body>
-    <div class="print-actions">
-        <button onclick="window.print()">Imprimir dos copias</button>
+
+<div class="print-actions">
+    <button onclick="window.print()">Imprimir</button>
+</div>
+
+{% set FUEL_TYPES = ["NAFTA SUPER", "NAFTA INFINIA", "ULTRA DIESEL", "INFINIA DIESEL", "OTROS"] %}
+{% set vft = voucher.fuel_type | upper %}
+
+{% for copy in [("Original", true, "Firma Encargado de Combustible"), ("Duplicado", false, "Firma Responsable Planilla")] %}
+{% set copy_label = copy[0] %}
+{% set show_valid = copy[1] %}
+{% set sig_label  = copy[2] %}
+
+<section class="voucher-copy">
+
+    <!-- Cabecera -->
+    <div class="voucher-header">
+        <div class="logo-area">
+            {# Para usar tu logo: reemplazá la línea de abajo por <img src="/static/img/logo.png" alt="Logo"> #}
+            <span class="logo-placeholder">IARSA</span>
+        </div>
+        <div class="title-area">
+            <h1>VALE DE COMBUSTIBLE</h1>
+        </div>
+        <div class="serial-area">Nº: {{ voucher.serial_number }}</div>
     </div>
 
-    {% for label in ["Original", "Duplicado"] %}
-    <section class="voucher-copy">
-        <h1>VALE DE COMBUSTIBLE - {{ voucher.serial_number }}</h1>
-        <p class="copy-label">Copia: {{ label }}</p>
-        <div class="grid">
-            <div class="row"><strong>Fecha:</strong> {{ voucher.issue_date }}</div>
-            <div class="row"><strong>Responsable:</strong> {{ voucher.employee_name }}</div>
-            <div class="row"><strong>Area:</strong> {{ voucher.area }}</div>
-            <div class="row"><strong>Vehiculo ID:</strong> {{ voucher.vehicle_id }}</div>
-            <div class="row"><strong>Combustible:</strong> {{ voucher.fuel_type }}</div>
-            <div class="row"><strong>Cantidad:</strong> {% if voucher.liters and voucher.liters > 0 %}{{ '%.2f'|format(voucher.liters) }} L{% else %}A completar en estacion{% endif %}</div>
-            <div class="row"><strong>Estacion:</strong> {{ voucher.station }}</div>
-            <div class="row"><strong>Obs:</strong> {{ voucher.notes or '-' }}</div>
+    <!-- Obra / Fecha -->
+    <div class="obra-row">
+        <div><span class="lbl">OBRA:</span> <span class="val">{{ voucher.area }}</span></div>
+        <div><span class="lbl">FECHA:</span> <span class="val">{{ voucher.issue_date }}</span></div>
+    </div>
+
+    <!-- Tabla de tipos de combustible -->
+    <table class="fuel-table">
+        <thead>
+            <tr>
+                <th>TIPO DE COMBUSTIBLE</th>
+                <th>CANTIDAD</th>
+                <th>PESOS</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ft in FUEL_TYPES %}
+                {% if ft == "OTROS" %}
+                    {% set is_active = vft not in ["NAFTA SUPER", "NAFTA INFINIA", "ULTRA DIESEL", "INFINIA DIESEL"] %}
+                {% else %}
+                    {% set is_active = vft == ft %}
+                {% endif %}
+            <tr{% if is_active %} class="active-fuel"{% endif %}>
+                <td>{{ ft }}</td>
+                <td>
+                    {% if is_active %}
+                        {% if voucher.liters and voucher.liters > 0 %}{{ '%.2f'|format(voucher.liters) }}{% else %}A completar{% endif %}
+                    {% endif %}
+                </td>
+                <td></td>
+            </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td></td>
+                <td></td>
+                <td>$ &nbsp;</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <!-- Texto validez (solo original) -->
+    {% if show_valid %}
+    <p class="valid-text">Válido únicamente para utilizar en estación {{ voucher.station }}</p>
+    {% endif %}
+
+    <!-- Entregado a -->
+    <div class="footer-line">
+        <span class="lbl">ENTREGADO A:</span>
+        <span class="val">{{ voucher.employee_name }}</span>
+    </div>
+
+    <!-- Camion / Patente / Autorizo -->
+    <div class="footer-bottom">
+        <div class="left">
+            <div class="footer-line">
+                <span class="lbl">CAMION O EQUIP:</span>
+                <span class="val">{{ voucher.vehicle.brand }} {{ voucher.vehicle.model }}</span>
+            </div>
+            <div class="footer-line">
+                <span class="lbl">PATENTE Nº:</span>
+                <span class="val">{{ voucher.vehicle.plate }}</span>
+            </div>
+            {% if show_valid %}
+            <div class="footer-line">
+                <span class="lbl">AUTORIZO:</span>
+                <span class="val" style="min-width: 110px;"></span>
+            </div>
+            {% endif %}
         </div>
-        <div class="signatures">
-            <div class="signature-box">Firma Responsable</div>
-            <div class="signature-box">Firma Autorizacion</div>
-        </div>
-    </section>
-    {% endfor %}
+        <div class="signature-label">{{ sig_label }}</div>
+    </div>
+
+</section>
+{% endfor %}
+
 </body>
 </html>

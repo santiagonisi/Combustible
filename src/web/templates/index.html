@@ -33,14 +33,16 @@
             <h2>Registro de Vehiculos</h2>
             <form id="vehicleForm" class="form-grid">
                 <input name="code" placeholder="Codigo interno" required>
-                <input name="plate" placeholder="Placa" required>
+                <input name="plate" placeholder="Patente" required>
                 <input name="brand" placeholder="Marca" required>
                 <input name="model" placeholder="Modelo" required>
                 <select name="fuel_type" required>
                     <option value="">Tipo de combustible</option>
-                    <option value="Gasolina">Gasolina</option>
-                    <option value="Diesel">Diesel</option>
-                    <option value="GNV">GNV</option>
+                    <option value="Nafta Super">Nafta Super</option>
+                    <option value="Nafta Infinia">Nafta Infinia</option>
+                    <option value="Ultra Diesel">Ultra Diesel</option>
+                    <option value="Diesel Infinia">Diesel Infinia</option>
+                    <option value="Otros">Otros</option>
                 </select>
                 <button type="submit">Guardar vehiculo</button>
             </form>
@@ -49,7 +51,7 @@
                     <thead>
                         <tr>
                             <th>Codigo</th>
-                            <th>Placa</th>
+                            <th>Patente</th>
                             <th>Vehiculo</th>
                             <th>Combustible</th>
                         </tr>
@@ -70,11 +72,12 @@
                 </select>
                 <select name="fuel_type" id="fuelTypeSelect" required>
                     <option value="">Tipo de combustible</option>
-                    <option value="Gasolina">Gasolina</option>
-                    <option value="Diesel">Diesel</option>
-                    <option value="GNV">GNV</option>
+                    <option value="Nafta Super">Nafta Super</option>
+                    <option value="Nafta Infinia">Nafta Infinia</option>
+                    <option value="Ultra Diesel">Ultra Diesel</option>
+                    <option value="Diesel Infinia">Diesel Infinia</option>
+                    <option value="Otros">Otros</option>
                 </select>
-                <input name="station" placeholder="Estacion / Grifo" required>
                 <textarea name="notes" placeholder="Observaciones (opcional)"></textarea>
                 <button type="submit">Emitir vale y guardar</button>
             </form>
@@ -119,9 +122,9 @@
     <section class="panel">
         <div class="table-header">
             <h2>Historial Mensual de Vales</h2>
-            <button id="refreshBtn" type="button">Actualizar</button>
+            <button id="refreshBtn" type="button" style="width: 200px;">Actualizar</button>
         </div>
-        <div class="table-wrap">
+        <div class="table-wrap" style="margin-top: 14px;">
             <table>
                 <thead>
                     <tr>

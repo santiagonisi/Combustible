@@ -1,3 +1,6 @@
+from datetime import date
+from types import SimpleNamespace
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -14,6 +17,35 @@ router = APIRouter(tags=["views"])
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@router.get("/print-preview", response_class=HTMLResponse)
+def print_voucher_preview(request: Request):
+    # Preview sin datos reales para validar diseno antes de cargar registros.
+    preview_voucher = SimpleNamespace(
+        id=0,
+        serial_number="I-2468",
+        issue_date=date.today(),
+        employee_name="Nombre y apellido",
+        area="Obra de ejemplo",
+        vehicle_id=0,
+        fuel_type="ULTRA DIESEL",
+        liters=120.0,
+        station="GNC DE LA COSTA S.R.L.",
+        notes="",
+        vehicle=SimpleNamespace(
+            brand="Mercedes-Benz",
+            model="Atego 1726",
+            plate="AA123BB",
+        ),
+    )
+    return templates.TemplateResponse(
+        "print_voucher.html",
+        {
+            "request": request,
+            "voucher": preview_voucher,
+        },
+    )
 
 
 @router.get("/print/{voucher_id}", response_class=HTMLResponse)

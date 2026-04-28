@@ -21,7 +21,6 @@ def home(request: Request):
 
 @router.get("/print-preview", response_class=HTMLResponse)
 def print_voucher_preview(request: Request):
-    # Preview sin datos reales para validar diseno antes de cargar registros.
     preview_voucher = SimpleNamespace(
         id=0,
         serial_number="I-2468",

@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from src.api.routes import monthly_invoices, reports, vehicles, views, vouchers
 from src.core.config import settings
 from src.db.database import Base, engine
-from src.models import monthly_invoice, vehicle, voucher  # noqa: F401
+from src.models import monthly_invoice, vehicle, voucher
 
 
 app = FastAPI(title=settings.app_name, version=settings.app_version)

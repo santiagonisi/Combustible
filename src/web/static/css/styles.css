@@ -54,6 +54,20 @@ body {
 
 .hero p { margin: 0; max-width: 740px; }
 
+.hero-left {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+
+.hero-logo {
+    height: 72px;
+    width: auto;
+    object-fit: contain;
+    filter: brightness(0) invert(1);
+    flex-shrink: 0;
+}
+
 .month-picker {
     background: rgba(255, 255, 255, 0.15);
     border: 1px solid rgba(255, 255, 255, 0.25);

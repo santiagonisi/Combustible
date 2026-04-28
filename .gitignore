@@ -1,0 +1,58 @@
+__pycache__/
+*.pyc
+.venv/
+combustible.db
+.pytest_cache/
+.vscode/
+
+# Python build and cache
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+build/
+dist/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Virtual environments
+env/
+venv/
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+*.env
+*.secret
+*.secrets
+secrets/
+
+# Credentials and keys
+*.pem
+*.key
+*.pfx
+*.p12
+*.crt
+*.csr
+id_rsa
+id_ed25519
+
+# Local databases and exports
+*.db
+*.sqlite
+*.sqlite3
+backups/
+exports/
+
+# Logs and temp
+*.log
+logs/
+tmp/
+temp/
+
+# OS/editor files
+.DS_Store
+Thumbs.db

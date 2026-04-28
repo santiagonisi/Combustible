@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Impresion de Vale</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 18px; color: #111827; }
+        .print-actions { margin-bottom: 16px; }
+        .print-actions button { padding: 8px 14px; border: 1px solid #1f2937; background: #fff; cursor: pointer; }
+        .voucher-copy { border: 2px solid #111827; margin-bottom: 20px; padding: 12px; }
+        .voucher-copy h1 { margin: 0 0 10px; font-size: 18px; }
+        .copy-label { font-size: 12px; font-weight: bold; margin-bottom: 10px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 18px; }
+        .row { border-bottom: 1px solid #d1d5db; padding-bottom: 4px; }
+        .signatures { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 28px; }
+        .signature-box { border-top: 1px solid #111827; padding-top: 6px; font-size: 12px; text-align: center; }
+        @media print {
+            .print-actions { display: none; }
+            .voucher-copy { page-break-inside: avoid; }
+        }
+    </style>
+</head>
+<body>
+    <div class="print-actions">
+        <button onclick="window.print()">Imprimir dos copias</button>
+    </div>
+
+    {% for label in ["Original", "Duplicado"] %}
+    <section class="voucher-copy">
+        <h1>VALE DE COMBUSTIBLE - {{ voucher.serial_number }}</h1>
+        <p class="copy-label">Copia: {{ label }}</p>
+        <div class="grid">
+            <div class="row"><strong>Fecha:</strong> {{ voucher.issue_date }}</div>
+            <div class="row"><strong>Responsable:</strong> {{ voucher.employee_name }}</div>
+            <div class="row"><strong>Area:</strong> {{ voucher.area }}</div>
+            <div class="row"><strong>Vehiculo ID:</strong> {{ voucher.vehicle_id }}</div>
+            <div class="row"><strong>Combustible:</strong> {{ voucher.fuel_type }}</div>
+            <div class="row"><strong>Cantidad:</strong> {{ '%.2f'|format(voucher.liters) }} L</div>
+            <div class="row"><strong>Estacion:</strong> {{ voucher.station }}</div>
+            <div class="row"><strong>Obs:</strong> {{ voucher.notes or '-' }}</div>
+        </div>
+        <div class="signatures">
+            <div class="signature-box">Firma Responsable</div>
+            <div class="signature-box">Firma Autorizacion</div>
+        </div>
+    </section>
+    {% endfor %}
+</body>
+</html>

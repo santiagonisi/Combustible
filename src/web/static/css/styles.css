@@ -1,10 +1,10 @@
 :root {
-    --bg: #f5f7f4;
+    --bg: #ffffff;
     --panel: #ffffff;
     --ink: #1b1f24;
     --muted: #4b5563;
-    --brand: #0b6e4f;
-    --brand-2: #169873;
+    --brand: #e3c019;
+    --brand-2: #e6c028;
     --accent: #f4b400;
     --line: #d7dde5;
 }
@@ -15,7 +15,7 @@ body {
     margin: 0;
     font-family: "Barlow", sans-serif;
     color: var(--ink);
-    background: radial-gradient(circle at top right, #dff2eb 0%, #f5f7f4 38%, #eef2f7 100%);
+    background: var(--bg);
 }
 
 .app-shell {
@@ -27,7 +27,7 @@ body {
 }
 
 .hero {
-    background: linear-gradient(125deg, #083829 0%, #0b6e4f 55%, #1a9b6f 100%);
+    background: linear-gradient(125deg, #e3c019 0%, #e6c028 55%, #f1cf45 100%);
     color: #fff;
     border-radius: 20px;
     padding: 24px;
@@ -106,6 +106,11 @@ body {
 .form-grid {
     display: grid;
     gap: 8px;
+    background: #ffffff;
+    border: 1px solid #e7ecf2;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
 }
 
 input, select, textarea, button {
@@ -130,6 +135,16 @@ button {
 button:hover {
     background: var(--brand-2);
     transform: translateY(-1px);
+}
+
+.secondary-btn {
+    background: #ffffff;
+    color: var(--ink);
+    border: 1px solid var(--line);
+}
+
+.secondary-btn:hover {
+    background: #f8fafc;
 }
 
 .helper { font-size: 0.9rem; color: var(--muted); margin-bottom: 0; }
@@ -172,6 +187,22 @@ th {
     color: var(--brand);
     font-weight: 700;
     text-decoration: none;
+}
+
+.table-action {
+    width: auto;
+    padding: 6px 10px;
+    margin-right: 6px;
+    border-radius: 8px;
+    background: var(--brand);
+    color: #ffffff;
+    border: none;
+    font-size: 0.82rem;
+    font-weight: 700;
+}
+
+.table-action.danger {
+    background: #b91c1c;
 }
 
 @keyframes reveal {

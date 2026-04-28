@@ -52,7 +52,18 @@ exports/
 logs/
 tmp/
 temp/
+*.tmp
+*.bak
+*.swp
+
+# Local runtime data
+instance/
+uploads/
+storage/
 
 # OS/editor files
 .DS_Store
 Thumbs.db
+.idea/
+.history/
+.python-version

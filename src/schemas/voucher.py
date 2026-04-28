@@ -9,7 +9,7 @@ class VoucherCreate(BaseModel):
     area: str = Field(min_length=2, max_length=100)
     vehicle_id: int
     fuel_type: str = Field(min_length=3, max_length=20)
-    liters: float = Field(gt=0)
+    liters: float | None = Field(default=None, ge=0)
     station: str = Field(min_length=2, max_length=120)
     notes: str | None = Field(default="", max_length=300)
 
@@ -22,7 +22,7 @@ class VoucherRead(BaseModel):
     area: str
     vehicle_id: int
     fuel_type: str
-    liters: float
+    liters: float | None
     station: str
     notes: str | None
     created_at: datetime

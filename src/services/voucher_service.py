@@ -30,7 +30,9 @@ def create_voucher(db: Session, payload: VoucherCreate) -> Voucher:
         raise ValueError("El vehiculo seleccionado no existe o esta inactivo")
 
     serial = _serial_for_month(db, payload.issue_date)
-    voucher = Voucher(serial_number=serial, **payload.model_dump())
+    data = payload.model_dump()
+    data["liters"] = float(data["liters"] or 0)
+    voucher = Voucher(serial_number=serial, **data)
     db.add(voucher)
     db.commit()
     db.refresh(voucher)

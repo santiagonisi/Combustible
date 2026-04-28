@@ -5,7 +5,7 @@ from src.services.voucher_service import list_vouchers_by_month
 
 def monthly_report(db, month: str) -> MonthlyReport:
     vouchers = list_vouchers_by_month(db, month)
-    total_liters = round(sum(v.liters for v in vouchers), 2)
+    total_liters = round(sum((v.liters or 0) for v in vouchers), 2)
     serialized = [VoucherRead.model_validate(v) for v in vouchers]
     return MonthlyReport(
         month=month,

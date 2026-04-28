@@ -36,7 +36,7 @@
             <div class="row"><strong>Area:</strong> {{ voucher.area }}</div>
             <div class="row"><strong>Vehiculo ID:</strong> {{ voucher.vehicle_id }}</div>
             <div class="row"><strong>Combustible:</strong> {{ voucher.fuel_type }}</div>
-            <div class="row"><strong>Cantidad:</strong> {{ '%.2f'|format(voucher.liters) }} L</div>
+            <div class="row"><strong>Cantidad:</strong> {% if voucher.liters and voucher.liters > 0 %}{{ '%.2f'|format(voucher.liters) }} L{% else %}A completar en estacion{% endif %}</div>
             <div class="row"><strong>Estacion:</strong> {{ voucher.station }}</div>
             <div class="row"><strong>Obs:</strong> {{ voucher.notes or '-' }}</div>
         </div>

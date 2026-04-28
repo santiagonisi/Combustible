@@ -1,16 +1,23 @@
 const reportMonthInput = document.getElementById("reportMonth");
+const invoiceMonthInput = document.getElementById("invoiceMonth");
 const vehicleForm = document.getElementById("vehicleForm");
 const voucherForm = document.getElementById("voucherForm");
+const invoiceForm = document.getElementById("invoiceForm");
+const invoiceSubmitBtn = document.getElementById("invoiceSubmitBtn");
+const invoiceCancelEditBtn = document.getElementById("invoiceCancelEditBtn");
 const vehiclesTableBody = document.getElementById("vehiclesTableBody");
 const vouchersTableBody = document.getElementById("vouchersTableBody");
+const invoicesTableBody = document.getElementById("invoicesTableBody");
 const vehicleSelect = document.getElementById("vehicleSelect");
 const fuelTypeSelect = document.getElementById("fuelTypeSelect");
 const totalVouchers = document.getElementById("totalVouchers");
-const totalLiters = document.getElementById("totalLiters");
+const invoiceLiters = document.getElementById("invoiceLiters");
 const totalVehicles = document.getElementById("totalVehicles");
+const invoiceSummary = document.getElementById("invoiceSummary");
 const refreshBtn = document.getElementById("refreshBtn");
 
 let vehicles = [];
+let editingInvoiceId = null;
 
 function currentMonthValue() {
     const now = new Date();
@@ -65,19 +72,67 @@ function setVoucherRows(items) {
     vouchersTableBody.innerHTML = "";
     items.forEach((voucher) => {
         const vehicle = vehicles.find((v) => v.id === voucher.vehicle_id);
+        const quantityLabel = voucher.liters && voucher.liters > 0
+            ? `${voucher.liters.toFixed(2)} L`
+            : "A completar en estacion";
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${voucher.serial_number}</td>
             <td>${voucher.issue_date}</td>
             <td>${voucher.employee_name}</td>
             <td>${voucher.area}</td>
-            <td>${voucher.liters.toFixed(2)} L</td>
+            <td>${quantityLabel}</td>
             <td>${voucher.fuel_type}</td>
             <td>${vehicle ? `${vehicle.code} / ${vehicle.plate}` : voucher.vehicle_id}</td>
             <td><a class="link-btn" href="/print/${voucher.id}" target="_blank">Imprimir x2</a></td>
         `;
         vouchersTableBody.appendChild(tr);
     });
+}
+
+function setInvoiceRows(summary) {
+    invoicesTableBody.innerHTML = "";
+
+    summary.invoices.forEach((invoice) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${invoice.month}</td>
+            <td>${invoice.station}</td>
+            <td>${invoice.invoice_number}</td>
+            <td>${invoice.total_vouchers}</td>
+            <td>${Number(invoice.total_liters).toFixed(2)} L</td>
+            <td>${Number(invoice.total_amount).toFixed(2)}</td>
+            <td>
+                <button type="button" class="table-action" data-action="edit" data-id="${invoice.id}">Editar</button>
+                <button type="button" class="table-action danger" data-action="delete" data-id="${invoice.id}">Eliminar</button>
+            </td>
+        `;
+        invoicesTableBody.appendChild(tr);
+    });
+
+    invoiceSummary.textContent = `Facturas: ${summary.total_invoices} | Vales facturados: ${summary.total_vouchers} | Litros facturados: ${Number(summary.total_liters).toFixed(2)} L | Monto: ${Number(summary.total_amount).toFixed(2)}`;
+    invoiceLiters.textContent = `${Number(summary.total_liters).toFixed(2)} L`;
+}
+
+function resetInvoiceForm() {
+    editingInvoiceId = null;
+    invoiceForm.reset();
+    invoiceMonthInput.value = reportMonthInput.value;
+    invoiceSubmitBtn.textContent = "Guardar factura mensual";
+    invoiceCancelEditBtn.style.display = "none";
+}
+
+function populateInvoiceForm(invoice) {
+    editingInvoiceId = invoice.id;
+    invoiceForm.month.value = invoice.month;
+    invoiceForm.station.value = invoice.station;
+    invoiceForm.invoice_number.value = invoice.invoice_number;
+    invoiceForm.total_vouchers.value = invoice.total_vouchers;
+    invoiceForm.total_liters.value = invoice.total_liters;
+    invoiceForm.total_amount.value = invoice.total_amount;
+    invoiceForm.notes.value = invoice.notes || "";
+    invoiceSubmitBtn.textContent = "Actualizar factura mensual";
+    invoiceCancelEditBtn.style.display = "block";
 }
 
 async function loadVehicles() {
@@ -89,8 +144,13 @@ async function loadReport() {
     const month = reportMonthInput.value;
     const report = await api(`/api/reports/monthly?month=${month}`);
     totalVouchers.textContent = String(report.total_vouchers);
-    totalLiters.textContent = `${Number(report.total_liters).toFixed(2)} L`;
     setVoucherRows(report.vouchers);
+}
+
+async function loadInvoices() {
+    const month = reportMonthInput.value;
+    const summary = await api(`/api/monthly-invoices?month=${month}`);
+    setInvoiceRows(summary);
 }
 
 vehicleSelect.addEventListener("change", () => {
@@ -119,7 +179,6 @@ voucherForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(voucherForm).entries());
     payload.vehicle_id = Number(payload.vehicle_id);
-    payload.liters = Number(payload.liters);
 
     try {
         const created = await api("/api/vouchers", {
@@ -135,9 +194,89 @@ voucherForm.addEventListener("submit", async (event) => {
     }
 });
 
+invoiceForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = Object.fromEntries(new FormData(invoiceForm).entries());
+    payload.total_vouchers = Number(payload.total_vouchers);
+    payload.total_liters = Number(payload.total_liters);
+    payload.total_amount = Number(payload.total_amount);
+
+    try {
+        await api(editingInvoiceId ? `/api/monthly-invoices/${editingInvoiceId}` : "/api/monthly-invoices", {
+            method: editingInvoiceId ? "PUT" : "POST",
+            body: JSON.stringify(payload),
+        });
+        resetInvoiceForm();
+        await loadInvoices();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+invoiceCancelEditBtn.addEventListener("click", () => {
+    resetInvoiceForm();
+});
+
+invoicesTableBody.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) {
+        return;
+    }
+
+    const action = target.dataset.action;
+    const id = Number(target.dataset.id);
+    if (!action || !id) {
+        return;
+    }
+
+    if (action === "edit") {
+        const month = reportMonthInput.value;
+        try {
+            const summary = await api(`/api/monthly-invoices?month=${month}`);
+            const invoice = summary.invoices.find((item) => item.id === id);
+            if (!invoice) {
+                alert("No se encontro la factura seleccionada");
+                return;
+            }
+            populateInvoiceForm(invoice);
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+
+    if (action === "delete") {
+        const confirmed = window.confirm("Se eliminara la factura mensual seleccionada. Continuar?");
+        if (!confirmed) {
+            return;
+        }
+        try {
+            await api(`/api/monthly-invoices/${id}`, { method: "DELETE" });
+            if (editingInvoiceId === id) {
+                resetInvoiceForm();
+            }
+            await loadInvoices();
+        } catch (error) {
+            alert(error.message);
+        }
+    }
+});
+
+reportMonthInput.addEventListener("change", async () => {
+    if (!editingInvoiceId) {
+        invoiceMonthInput.value = reportMonthInput.value;
+    }
+    try {
+        await loadReport();
+        await loadInvoices();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
 refreshBtn.addEventListener("click", async () => {
     try {
         await loadReport();
+        await loadInvoices();
     } catch (error) {
         alert(error.message);
     }
@@ -145,10 +284,12 @@ refreshBtn.addEventListener("click", async () => {
 
 (async function init() {
     reportMonthInput.value = currentMonthValue();
+    resetInvoiceForm();
     voucherForm.issue_date.value = new Date().toISOString().split("T")[0];
     try {
         await loadVehicles();
         await loadReport();
+        await loadInvoices();
     } catch (error) {
         alert(error.message);
     }

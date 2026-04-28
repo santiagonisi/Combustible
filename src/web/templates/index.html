@@ -4,7 +4,6 @@
 <div class="app-shell">
     <header class="hero">
         <div>
-            <p class="eyebrow">Gestion Operativa</p>
             <h1>Control y Confeccion de Vales de Combustible</h1>
             <p>Registra vehiculos, emite vales por duplicado y controla el consumo mensual con historial detallado.</p>
         </div>
@@ -20,8 +19,8 @@
             <strong id="totalVouchers">0</strong>
         </article>
         <article class="stat-card">
-            <p>Combustible consumido</p>
-            <strong id="totalLiters">0 L</strong>
+            <p>Litros en facturas</p>
+            <strong id="invoiceLiters">0 L</strong>
         </article>
         <article class="stat-card">
             <p>Vehiculos registrados</p>
@@ -75,14 +74,47 @@
                     <option value="Diesel">Diesel</option>
                     <option value="GNV">GNV</option>
                 </select>
-                <input type="number" step="0.01" min="0.01" name="liters" placeholder="Litros" required>
                 <input name="station" placeholder="Estacion / Grifo" required>
                 <textarea name="notes" placeholder="Observaciones (opcional)"></textarea>
                 <button type="submit">Emitir vale y guardar</button>
             </form>
-            <p class="helper">Al emitir, se guarda en historial y se habilita impresion en dos copias.</p>
+            <p class="helper">Al emitir, se guarda en historial y se habilita impresion en dos copias. La cantidad queda a completar en estacion.</p>
         </section>
     </main>
+
+    <section class="panel">
+        <div class="table-header">
+            <h2>Registro de Factura Mensual</h2>
+        </div>
+        <form id="invoiceForm" class="form-grid">
+            <input type="month" name="month" id="invoiceMonth" required>
+            <input name="station" placeholder="Estacion de servicio" required>
+            <input name="invoice_number" placeholder="Numero de factura" required>
+            <input type="number" min="0" step="1" name="total_vouchers" placeholder="Cantidad de vales" required>
+            <input type="number" min="0" step="0.01" name="total_liters" placeholder="Litros facturados" required>
+            <input type="number" min="0" step="0.01" name="total_amount" placeholder="Monto total facturado" required>
+            <textarea name="notes" placeholder="Observaciones de factura (opcional)"></textarea>
+            <button type="submit" id="invoiceSubmitBtn">Guardar factura mensual</button>
+            <button type="button" id="invoiceCancelEditBtn" class="secondary-btn" style="display:none;">Cancelar edicion</button>
+        </form>
+        <p class="helper" id="invoiceSummary">Facturas: 0 | Vales facturados: 0 | Litros facturados: 0 L | Monto: 0</p>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mes</th>
+                        <th>Estacion</th>
+                        <th>Factura</th>
+                        <th>Vales</th>
+                        <th>Litros</th>
+                        <th>Monto</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="invoicesTableBody"></tbody>
+            </table>
+        </div>
+    </section>
 
     <section class="panel">
         <div class="table-header">
@@ -97,7 +129,7 @@
                         <th>Fecha</th>
                         <th>Persona</th>
                         <th>Area</th>
-                        <th>Litros</th>
+                        <th>Cantidad</th>
                         <th>Combustible</th>
                         <th>Vehiculo</th>
                         <th>Acciones</th>

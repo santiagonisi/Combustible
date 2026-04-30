@@ -223,7 +223,7 @@
                 {% else %}
                     {% set is_active = vft == ft %}
                 {% endif %}
-            <tr{% if is_active %} class="active-fuel"{% endif %}>
+            <tr {% if is_active %}class="active-fuel"{% endif %}>
                 <td>{{ ft }}</td>
                 <td>
                     {% if is_active %}

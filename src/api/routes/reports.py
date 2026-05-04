@@ -10,5 +10,10 @@ router = APIRouter(prefix="/api/reports", tags=["reports"])
 
 
 @router.get("/monthly", response_model=MonthlyReport)
-def get_monthly_report(month: str = Query(..., pattern=r"^\d{4}-\d{2}$"), db: Session = Depends(get_db)):
-    return monthly_report(db, month)
+def get_monthly_report(
+    month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return monthly_report(db, month, page, page_size)

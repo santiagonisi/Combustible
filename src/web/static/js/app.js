@@ -53,6 +53,7 @@ function setVehicleRows(items) {
             <td>${vehicle.plate}</td>
             <td>${vehicle.brand} ${vehicle.model}</td>
             <td>${vehicle.fuel_type}</td>
+            <td><button type="button" class="table-action danger" data-action="delete-vehicle" data-id="${vehicle.id}">Eliminar</button></td>
         `;
         vehiclesTableBody.appendChild(tr);
 
@@ -237,6 +238,22 @@ invoiceForm.addEventListener("submit", async (event) => {
 
 invoiceCancelEditBtn.addEventListener("click", () => {
     resetInvoiceForm();
+});
+
+vehiclesTableBody.addEventListener("click", async (event) => {
+    const target = event.target;
+    if (!(target instanceof HTMLElement)) return;
+    const action = target.dataset.action;
+    const id = Number(target.dataset.id);
+    if (action !== "delete-vehicle" || !id) return;
+    const confirmed = window.confirm("Se eliminara el vehiculo seleccionado. Continuar?");
+    if (!confirmed) return;
+    try {
+        await api(`/api/vehicles/${id}`, { method: "DELETE" });
+        await loadVehicles();
+    } catch (error) {
+        alert(error.message);
+    }
 });
 
 invoicesTableBody.addEventListener("click", async (event) => {

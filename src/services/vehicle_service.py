@@ -14,3 +14,12 @@ def create_vehicle(db: Session, payload: VehicleCreate) -> Vehicle:
     db.commit()
     db.refresh(vehicle)
     return vehicle
+
+
+def delete_vehicle(db: Session, vehicle_id: int) -> None:
+    vehicle = db.query(Vehicle).filter(Vehicle.id == vehicle_id).first()
+    if not vehicle:
+        return None
+    db.delete(vehicle)
+    db.commit()
+    return vehicle

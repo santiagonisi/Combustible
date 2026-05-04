@@ -38,4 +38,9 @@ class MonthlyInvoiceSummary(BaseModel):
     total_vouchers: int
     total_liters: float
     total_amount: float
+    page: int
+    page_size: int
+    total_pages: int
+    has_next: bool
+    has_prev: bool
     invoices: list[MonthlyInvoiceRead]

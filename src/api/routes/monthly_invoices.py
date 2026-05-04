@@ -20,8 +20,13 @@ router = APIRouter(prefix="/api/monthly-invoices", tags=["monthly-invoices"])
 
 
 @router.get("", response_model=MonthlyInvoiceSummary)
-def get_monthly_invoices(month: str = Query(..., pattern=r"^\d{4}-\d{2}$"), db: Session = Depends(get_db)):
-    return monthly_invoice_summary(db, month)
+def get_monthly_invoices(
+    month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
+    page: int = Query(1, ge=1),
+    page_size: int = Query(10, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    return monthly_invoice_summary(db, month, page, page_size)
 
 
 @router.post("", response_model=MonthlyInvoiceRead)

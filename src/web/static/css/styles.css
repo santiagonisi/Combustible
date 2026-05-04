@@ -229,6 +229,11 @@ th {
     justify-content: center;
 }
 
+.table-action.print-btn {
+    background: #15803d;
+    text-decoration: none;
+}
+
 .td-center {
     text-align: center !important;
 }

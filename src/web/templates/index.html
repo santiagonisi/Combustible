@@ -33,7 +33,8 @@
     <main class="content-grid">
         <section class="panel">
             <h2>Registro de Vehiculos</h2>
-            <form id="vehicleForm" class="form-grid">
+            <p class="panel-lead">Alta rapida de unidades con identificacion y tipo de combustible.</p>
+            <form id="vehicleForm" class="form-grid form-vehicle">
                 <input name="code" placeholder="Codigo interno" required>
                 <input name="plate" placeholder="Patente" required>
                 <input name="brand" placeholder="Marca" required>
@@ -66,7 +67,8 @@
 
         <section class="panel">
             <h2>Emision de Vale</h2>
-            <form id="voucherForm" class="form-grid">
+            <p class="panel-lead">Completá los datos del responsable y vehiculo para emitir el vale mensual.</p>
+            <form id="voucherForm" class="form-grid form-voucher">
                 <input type="date" name="issue_date" required>
                 <input name="employee_name" placeholder="Responsable / Persona" required>
                 <input name="area" placeholder="Area / Dependencia" required>
@@ -81,10 +83,10 @@
                     <option value="Diesel Infinia">Diesel Infinia</option>
                     <option value="Otros">Otros</option>
                 </select>
-                <div id="litersWrapper" style="display:flex; gap:8px; align-items:center;">
-                    <input type="number" id="litersInput" name="liters" min="0" step="0.01" placeholder="Cantidad de litros" style="flex:1;">
-                    <label style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:13px; cursor:pointer; width:auto; padding:0; border:none; background:none; color:var(--ink); font-weight:500;">
-                        <input type="checkbox" id="litersCompletarCheck" style="width:auto; padding:0; cursor:pointer;"> A completar en estacion
+                <div id="litersWrapper" class="field-full liters-row">
+                    <input type="number" id="litersInput" name="liters" min="0" step="0.01" placeholder="Cantidad de litros">
+                    <label class="liters-check">
+                        <input type="checkbox" id="litersCompletarCheck"> A completar en estacion
                     </label>
                 </div>
                 <input name="station" placeholder="Estacion de servicio" required>
@@ -99,7 +101,8 @@
         <div class="table-header">
             <h2>Registro de Factura Mensual</h2>
         </div>
-        <form id="invoiceForm" class="form-grid">
+        <p class="panel-lead">Consolidado mensual para control de litros, vales y monto facturado.</p>
+        <form id="invoiceForm" class="form-grid form-invoice">
             <input type="month" name="month" id="invoiceMonth" required>
             <input name="station" placeholder="Estacion de servicio" required>
             <input name="invoice_number" placeholder="Numero de factura" required>
@@ -107,8 +110,10 @@
             <input type="number" min="0" step="0.01" name="total_liters" placeholder="Litros facturados" required>
             <input type="number" min="0" step="0.01" name="total_amount" placeholder="Monto total facturado" required>
             <textarea name="notes" placeholder="Observaciones de factura (opcional)"></textarea>
-            <button type="submit" id="invoiceSubmitBtn">Guardar factura mensual</button>
-            <button type="button" id="invoiceCancelEditBtn" class="secondary-btn" style="display:none;">Cancelar edicion</button>
+            <div class="field-full invoice-actions">
+                <button type="submit" id="invoiceSubmitBtn">Guardar factura mensual</button>
+                <button type="button" id="invoiceCancelEditBtn" class="secondary-btn" style="display:none;">Cancelar edicion</button>
+            </div>
         </form>
         <p class="helper" id="invoiceSummary">Facturas: 0 | Vales facturados: 0 | Litros facturados: 0 L | Monto: 0</p>
         <div class="table-wrap">
@@ -126,6 +131,11 @@
                 </thead>
                 <tbody id="invoicesTableBody"></tbody>
             </table>
+        </div>
+        <div class="pager" id="invoicePager">
+            <button type="button" id="invoicePrevPageBtn" class="secondary-btn">Anterior</button>
+            <span id="invoicePageInfo">Pagina 1 de 1</span>
+            <button type="button" id="invoiceNextPageBtn" class="secondary-btn">Siguiente</button>
         </div>
     </section>
 
@@ -151,8 +161,13 @@
                 <tbody id="vouchersTableBody"></tbody>
             </table>
         </div>
+        <div class="pager" id="reportPager">
+            <button type="button" id="reportPrevPageBtn" class="secondary-btn">Anterior</button>
+            <span id="reportPageInfo">Pagina 1 de 1</span>
+            <button type="button" id="reportNextPageBtn" class="secondary-btn">Siguiente</button>
+        </div>
     </section>
 </div>
 
-<script src="/static/js/app.js"></script>
+<script src="/static/js/app.js?v=20260504k"></script>
 {% endblock %}

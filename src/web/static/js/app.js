@@ -15,9 +15,22 @@ const invoiceLiters = document.getElementById("invoiceLiters");
 const totalVehicles = document.getElementById("totalVehicles");
 const invoiceSummary = document.getElementById("invoiceSummary");
 const refreshBtn = document.getElementById("refreshBtn");
+const reportPrevPageBtn = document.getElementById("reportPrevPageBtn");
+const reportNextPageBtn = document.getElementById("reportNextPageBtn");
+const reportPageInfo = document.getElementById("reportPageInfo");
+const invoicePrevPageBtn = document.getElementById("invoicePrevPageBtn");
+const invoiceNextPageBtn = document.getElementById("invoiceNextPageBtn");
+const invoicePageInfo = document.getElementById("invoicePageInfo");
 
 let vehicles = [];
 let editingInvoiceId = null;
+let reportPage = 1;
+let reportTotalPages = 1;
+const REPORT_PAGE_SIZE = 10;
+let invoicePage = 1;
+let invoiceTotalPages = 1;
+const INVOICE_PAGE_SIZE = 10;
+let currentInvoiceItems = [];
 
 function currentMonthValue() {
     const now = new Date();
@@ -39,6 +52,7 @@ async function api(url, options = {}) {
         }
         throw new Error(detail);
     }
+    if (response.status === 204) return null;
     return response.json();
 }
 
@@ -85,7 +99,10 @@ function setVoucherRows(items) {
             <td>${quantityLabel}</td>
             <td>${voucher.fuel_type}</td>
             <td>${vehicle ? `${vehicle.code} / ${vehicle.plate}` : voucher.vehicle_id}</td>
-            <td style="text-align:center"><button type="button" class="table-action danger icon-btn" onclick="window.open('/print/${voucher.id}','_blank')" title="Imprimir" style="margin:0;background:#15803d;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button></td>
+            <td style="text-align:center">
+                <button type="button" class="table-action danger icon-btn" onclick="window.open('/print/${voucher.id}','_blank')" title="Imprimir" style="margin:0;background:#15803d;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+                <button type="button" class="table-action danger icon-btn" data-action="delete-voucher" data-id="${voucher.id}" title="Eliminar" style="margin:0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+            </td>
         `;
         vouchersTableBody.appendChild(tr);
     });
@@ -93,6 +110,9 @@ function setVoucherRows(items) {
 
 function setInvoiceRows(summary) {
     invoicesTableBody.innerHTML = "";
+    currentInvoiceItems = summary.invoices;
+    invoicePage = summary.page;
+    invoiceTotalPages = summary.total_pages;
 
     summary.invoices.forEach((invoice) => {
         const tr = document.createElement("tr");
@@ -113,6 +133,9 @@ function setInvoiceRows(summary) {
 
     invoiceSummary.textContent = `Facturas: ${summary.total_invoices} | Vales facturados: ${summary.total_vouchers} | Litros facturados: ${Number(summary.total_liters).toFixed(2)} L | Monto: ${Number(summary.total_amount).toFixed(2)}`;
     invoiceLiters.textContent = `${Number(summary.total_liters).toFixed(2)} L`;
+    invoicePageInfo.textContent = `Pagina ${invoicePage} de ${invoiceTotalPages}`;
+    invoicePrevPageBtn.disabled = !summary.has_prev;
+    invoiceNextPageBtn.disabled = !summary.has_next;
 }
 
 function resetInvoiceForm() {
@@ -143,14 +166,19 @@ async function loadVehicles() {
 
 async function loadReport() {
     const month = reportMonthInput.value;
-    const report = await api(`/api/reports/monthly?month=${month}`);
+    const report = await api(`/api/reports/monthly?month=${month}&page=${reportPage}&page_size=${REPORT_PAGE_SIZE}`);
+    reportPage = report.page;
+    reportTotalPages = report.total_pages;
     totalVouchers.textContent = String(report.total_vouchers);
     setVoucherRows(report.vouchers);
+    reportPageInfo.textContent = `Pagina ${reportPage} de ${reportTotalPages}`;
+    reportPrevPageBtn.disabled = !report.has_prev;
+    reportNextPageBtn.disabled = !report.has_next;
 }
 
 async function loadInvoices() {
     const month = reportMonthInput.value;
-    const summary = await api(`/api/monthly-invoices?month=${month}`);
+    const summary = await api(`/api/monthly-invoices?month=${month}&page=${invoicePage}&page_size=${INVOICE_PAGE_SIZE}`);
     setInvoiceRows(summary);
 }
 
@@ -210,6 +238,7 @@ voucherForm.addEventListener("submit", async (event) => {
         litersInput.disabled = false;
         litersInput.placeholder = "Cantidad de litros";
         voucherForm.issue_date.value = new Date().toISOString().split("T")[0];
+        reportPage = 1;
         await loadReport();
         window.open(`/print/${created.id}`, "_blank");
     } catch (error) {
@@ -225,10 +254,14 @@ invoiceForm.addEventListener("submit", async (event) => {
     payload.total_amount = Number(payload.total_amount);
 
     try {
+        const isEditing = Boolean(editingInvoiceId);
         await api(editingInvoiceId ? `/api/monthly-invoices/${editingInvoiceId}` : "/api/monthly-invoices", {
             method: editingInvoiceId ? "PUT" : "POST",
             body: JSON.stringify(payload),
         });
+        if (!isEditing) {
+            invoicePage = 1;
+        }
         resetInvoiceForm();
         await loadInvoices();
     } catch (error) {
@@ -256,6 +289,26 @@ vehiclesTableBody.addEventListener("click", async (event) => {
     }
 });
 
+vouchersTableBody.addEventListener("click", async (event) => {
+    const target = event.target.closest("[data-action]");
+    if (!target) return;
+    const action = target.dataset.action;
+    const id = Number(target.dataset.id);
+    if (action !== "delete-voucher" || !id) return;
+    const confirmed = window.confirm("Se eliminara el vale seleccionado. Continuar?");
+    if (!confirmed) return;
+    try {
+        await api(`/api/vouchers/${id}`, { method: "DELETE" });
+        await loadReport();
+        if (reportPage > reportTotalPages) {
+            reportPage = reportTotalPages;
+            await loadReport();
+        }
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
 invoicesTableBody.addEventListener("click", async (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement)) {
@@ -269,18 +322,12 @@ invoicesTableBody.addEventListener("click", async (event) => {
     }
 
     if (action === "edit") {
-        const month = reportMonthInput.value;
-        try {
-            const summary = await api(`/api/monthly-invoices?month=${month}`);
-            const invoice = summary.invoices.find((item) => item.id === id);
-            if (!invoice) {
-                alert("No se encontro la factura seleccionada");
-                return;
-            }
-            populateInvoiceForm(invoice);
-        } catch (error) {
-            alert(error.message);
+        const invoice = currentInvoiceItems.find((item) => item.id === id);
+        if (!invoice) {
+            alert("No se encontro la factura seleccionada");
+            return;
         }
+        populateInvoiceForm(invoice);
     }
 
     if (action === "delete") {
@@ -294,6 +341,10 @@ invoicesTableBody.addEventListener("click", async (event) => {
                 resetInvoiceForm();
             }
             await loadInvoices();
+            if (invoicePage > invoiceTotalPages) {
+                invoicePage = invoiceTotalPages;
+                await loadInvoices();
+            }
         } catch (error) {
             alert(error.message);
         }
@@ -304,6 +355,8 @@ reportMonthInput.addEventListener("change", async () => {
     if (!editingInvoiceId) {
         invoiceMonthInput.value = reportMonthInput.value;
     }
+    reportPage = 1;
+    invoicePage = 1;
     try {
         await loadReport();
         await loadInvoices();
@@ -315,6 +368,46 @@ reportMonthInput.addEventListener("change", async () => {
 refreshBtn.addEventListener("click", async () => {
     try {
         await loadReport();
+        await loadInvoices();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+reportPrevPageBtn.addEventListener("click", async () => {
+    if (reportPage <= 1) return;
+    reportPage -= 1;
+    try {
+        await loadReport();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+reportNextPageBtn.addEventListener("click", async () => {
+    if (reportPage >= reportTotalPages) return;
+    reportPage += 1;
+    try {
+        await loadReport();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+invoicePrevPageBtn.addEventListener("click", async () => {
+    if (invoicePage <= 1) return;
+    invoicePage -= 1;
+    try {
+        await loadInvoices();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+invoiceNextPageBtn.addEventListener("click", async () => {
+    if (invoicePage >= invoiceTotalPages) return;
+    invoicePage += 1;
+    try {
         await loadInvoices();
     } catch (error) {
         alert(error.message);

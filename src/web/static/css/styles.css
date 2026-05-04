@@ -229,8 +229,8 @@ th {
     justify-content: center;
 }
 
-td:has(.table-action.icon-btn) {
-    text-align: center;
+.td-center {
+    text-align: center !important;
 }
 
 @keyframes reveal {

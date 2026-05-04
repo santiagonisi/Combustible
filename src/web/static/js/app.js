@@ -153,6 +153,20 @@ async function loadInvoices() {
     setInvoiceRows(summary);
 }
 
+const litersInput = document.getElementById("litersInput");
+const litersCompletarCheck = document.getElementById("litersCompletarCheck");
+
+litersCompletarCheck.addEventListener("change", () => {
+    if (litersCompletarCheck.checked) {
+        litersInput.value = "";
+        litersInput.disabled = true;
+        litersInput.placeholder = "A completar en estacion";
+    } else {
+        litersInput.disabled = false;
+        litersInput.placeholder = "Cantidad de litros";
+    }
+});
+
 vehicleSelect.addEventListener("change", () => {
     const selected = vehicleSelect.options[vehicleSelect.selectedIndex];
     if (selected && selected.dataset.fuelType) {
@@ -179,6 +193,11 @@ voucherForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const payload = Object.fromEntries(new FormData(voucherForm).entries());
     payload.vehicle_id = Number(payload.vehicle_id);
+    if (litersCompletarCheck.checked || !payload.liters) {
+        payload.liters = 0;
+    } else {
+        payload.liters = Number(payload.liters);
+    }
 
     try {
         const created = await api("/api/vouchers", {
@@ -186,6 +205,9 @@ voucherForm.addEventListener("submit", async (event) => {
             body: JSON.stringify(payload),
         });
         voucherForm.reset();
+        litersCompletarCheck.checked = false;
+        litersInput.disabled = false;
+        litersInput.placeholder = "Cantidad de litros";
         voucherForm.issue_date.value = new Date().toISOString().split("T")[0];
         await loadReport();
         window.open(`/print/${created.id}`, "_blank");

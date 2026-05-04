@@ -80,6 +80,12 @@
                     <option value="Diesel Infinia">Diesel Infinia</option>
                     <option value="Otros">Otros</option>
                 </select>
+                <div id="litersWrapper" style="display:flex; gap:8px; align-items:center;">
+                    <input type="number" id="litersInput" name="liters" min="0" step="0.01" placeholder="Cantidad de litros" style="flex:1;">
+                    <label style="display:flex; align-items:center; gap:6px; white-space:nowrap; font-size:13px; cursor:pointer; width:auto; padding:0; border:none; background:none; color:var(--ink); font-weight:500;">
+                        <input type="checkbox" id="litersCompletarCheck" style="width:auto; padding:0; cursor:pointer;"> A completar en estacion
+                    </label>
+                </div>
                 <textarea name="notes" placeholder="Observaciones (opcional)"></textarea>
                 <button type="submit">Emitir vale y guardar</button>
             </form>

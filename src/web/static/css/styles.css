@@ -230,7 +230,7 @@ th {
 }
 
 .table-action.print-btn {
-    background: #15803d;
+    background: #15803d !important;
     text-decoration: none;
 }
 

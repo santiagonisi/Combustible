@@ -169,8 +169,9 @@
             border-top: 1px solid #555;
             padding-top: 3px;
             text-align: center;
-            min-width: 160px;
+            min-width: 220px;
             white-space: nowrap;
+            padding-top: 28px;
         }
 
         @media print {
@@ -243,14 +244,14 @@
     {% if show_valid %}
     <p class="valid-text">Válido únicamente para utilizar en estación {{ voucher.station }}</p>
     {% endif %}
-    <div class="footer-line">
+    <div class="footer-line" style="max-width:66%;">
         <span class="lbl">ENTREGADO A:</span>
         <span class="val">{{ voucher.employee_name }}</span>
     </div>
     <div class="footer-bottom">
         <div class="left">
             <div class="footer-line">
-                <span class="lbl">CAMION O EQUIP:</span>
+                <span class="lbl">VEHICULO:</span>
                 <span class="val">{{ voucher.vehicle.brand }} {{ voucher.vehicle.model }}</span>
             </div>
             <div class="footer-line">

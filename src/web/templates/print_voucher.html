@@ -7,12 +7,17 @@
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
+        :root {
+            --sheet-margin: 14px;
+            --voucher-gap: var(--sheet-margin);
+        }
+
         body {
             font-family: Arial, sans-serif;
             font-size: 11px;
             color: #111;
             background: #fff;
-            padding: 14px;
+            padding: var(--sheet-margin);
         }
 
         .print-actions { margin-bottom: 14px; }
@@ -29,9 +34,16 @@
         .voucher-copy {
             border: 1.5px solid #222;
             padding: 8px 10px 10px 10px;
-            margin-bottom: 16px;
+            margin-bottom: 0;
             width: 100%;
             max-width: 700px;
+        }
+
+        .cut-line {
+            width: 100%;
+            max-width: 700px;
+            border-top: 1px dotted #c8c8c8;
+            margin: var(--voucher-gap) 0;
         }
 
         .voucher-header {
@@ -176,9 +188,21 @@
         }
 
         @media print {
+            :root {
+                --sheet-margin: 1cm;
+            }
+
+            @page {
+                margin: 0;
+            }
+
             .print-actions { display: none; }
-            body { padding: 4px; }
-            .voucher-copy { page-break-inside: avoid; margin-bottom: 10px; }
+            body { padding: var(--sheet-margin); }
+            .voucher-copy,
+            .cut-line {
+                max-width: none;
+            }
+            .voucher-copy { page-break-inside: avoid; }
         }
     </style>
 </head>
@@ -199,7 +223,7 @@
 <section class="voucher-copy">
     <div class="voucher-header">
         <div class="logo-area">
-            <img src="/static/img/logo.png" alt="IARSA Ingenieria">
+            <img src="/static/img/isologocolor.JPG" alt="IARSA Ingenieria">
         </div>
         <div class="title-area">
             <h1>VALE DE COMBUSTIBLE</h1>
@@ -264,6 +288,9 @@
     </div>
 
 </section>
+{% if not loop.last %}
+<div class="cut-line" aria-hidden="true"></div>
+{% endif %}
 {% endfor %}
 
 </body>

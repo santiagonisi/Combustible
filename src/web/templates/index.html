@@ -33,7 +33,6 @@
     <main class="content-grid">
         <section class="panel">
             <h2>Registro de Vehiculos</h2>
-            <p class="panel-lead">Alta rapida de unidades con identificacion y tipo de combustible.</p>
             <form id="vehicleForm" class="form-grid form-vehicle">
                 <input name="code" placeholder="Codigo interno" required>
                 <input name="plate" placeholder="Patente" required>
@@ -67,7 +66,7 @@
 
         <section class="panel">
             <h2>Emision de Vale</h2>
-            <p class="panel-lead">Completá los datos del responsable y vehiculo para emitir el vale mensual.</p>
+            <p class="panel-lead">Completá los datos del responsable y vehiculo para emitir el vale.</p>
             <form id="voucherForm" class="form-grid form-voucher">
                 <input type="date" name="issue_date" required>
                 <input name="employee_name" placeholder="Responsable / Persona" required>
@@ -101,7 +100,6 @@
         <div class="table-header">
             <h2>Registro de Factura Mensual</h2>
         </div>
-        <p class="panel-lead">Consolidado mensual para control de litros, vales y monto facturado.</p>
         <form id="invoiceForm" class="form-grid form-invoice">
             <input type="month" name="month" id="invoiceMonth" required>
             <input name="station" placeholder="Estacion de servicio" required>
@@ -116,6 +114,7 @@
             </div>
         </form>
         <p class="helper" id="invoiceSummary">Facturas: 0 | Vales facturados: 0 | Litros facturados: 0 L | Monto: 0</p>
+        <p></p>
         <div class="table-wrap">
             <table>
                 <thead>

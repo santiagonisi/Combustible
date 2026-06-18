@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session, joinedload
 
@@ -14,6 +14,11 @@ router = APIRouter(tags=["views"])
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
+
+
+@router.get("/favicon.ico", include_in_schema=False)
+def favicon():
+    return RedirectResponse(url="/static/img/logo.png")
 
 
 

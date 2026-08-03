@@ -14,6 +14,7 @@ def get_monthly_report(
     month: str = Query(..., pattern=r"^\d{4}-\d{2}$"),
     page: int = Query(1, ge=1),
     page_size: int = Query(10, ge=1, le=100),
+    search: str | None = Query(None),
     db: Session = Depends(get_db),
 ):
-    return monthly_report(db, month, page, page_size)
+    return monthly_report(db, month, page, page_size, search=search)

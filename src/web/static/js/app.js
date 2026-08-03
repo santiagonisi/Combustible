@@ -15,6 +15,8 @@ const invoiceLiters = document.getElementById("invoiceLiters");
 const totalVehicles = document.getElementById("totalVehicles");
 const invoiceSummary = document.getElementById("invoiceSummary");
 const refreshBtn = document.getElementById("refreshBtn");
+const exportBtn = document.getElementById("exportBtn");
+const voucherSearchInput = document.getElementById("voucherSearchInput");
 const reportPrevPageBtn = document.getElementById("reportPrevPageBtn");
 const reportNextPageBtn = document.getElementById("reportNextPageBtn");
 const reportPageInfo = document.getElementById("reportPageInfo");
@@ -26,6 +28,7 @@ let vehicles = [];
 let editingInvoiceId = null;
 let reportPage = 1;
 let reportTotalPages = 1;
+let reportSearch = "";
 const REPORT_PAGE_SIZE = 10;
 let invoicePage = 1;
 let invoiceTotalPages = 1;
@@ -85,6 +88,11 @@ function setVehicleRows(items) {
 
 function setVoucherRows(items) {
     vouchersTableBody.innerHTML = "";
+    if (!items.length) {
+        vouchersTableBody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:24px;color:#64748b;">No hay vales para este mes.</td></tr>';
+        return;
+    }
+
     items.forEach((voucher) => {
         const vehicle = vehicles.find((v) => v.id === voucher.vehicle_id);
         const quantityLabel = voucher.liters && voucher.liters > 0
@@ -146,6 +154,29 @@ function resetInvoiceForm() {
     invoiceCancelEditBtn.style.display = "none";
 }
 
+function showToast(message, tone = "info") {
+    const existing = document.getElementById("appToast");
+    if (existing) {
+        existing.remove();
+    }
+
+    const toast = document.createElement("div");
+    toast.id = "appToast";
+    toast.textContent = message;
+    toast.style.position = "fixed";
+    toast.style.right = "16px";
+    toast.style.bottom = "16px";
+    toast.style.zIndex = "9999";
+    toast.style.padding = "12px 14px";
+    toast.style.borderRadius = "999px";
+    toast.style.color = "#fff";
+    toast.style.fontWeight = "700";
+    toast.style.boxShadow = "0 10px 24px rgba(0,0,0,0.2)";
+    toast.style.background = tone === "success" ? "#15803d" : tone === "danger" ? "#b91c1c" : "#334155";
+    document.body.appendChild(toast);
+    window.setTimeout(() => toast.remove(), 2600);
+}
+
 function populateInvoiceForm(invoice) {
     editingInvoiceId = invoice.id;
     invoiceForm.month.value = invoice.month;
@@ -166,7 +197,15 @@ async function loadVehicles() {
 
 async function loadReport() {
     const month = reportMonthInput.value;
-    const report = await api(`/api/reports/monthly?month=${month}&page=${reportPage}&page_size=${REPORT_PAGE_SIZE}`);
+    const query = new URLSearchParams({
+        month,
+        page: String(reportPage),
+        page_size: String(REPORT_PAGE_SIZE),
+    });
+    if (reportSearch) {
+        query.set("search", reportSearch);
+    }
+    const report = await api(`/api/reports/monthly?${query.toString()}`);
     reportPage = report.page;
     reportTotalPages = report.total_pages;
     totalVouchers.textContent = String(report.total_vouchers);
@@ -213,6 +252,7 @@ vehicleForm.addEventListener("submit", async (event) => {
         });
         vehicleForm.reset();
         await loadVehicles();
+        showToast("Vehiculo guardado", "success");
     } catch (error) {
         alert(error.message);
     }
@@ -240,6 +280,7 @@ voucherForm.addEventListener("submit", async (event) => {
         voucherForm.issue_date.value = new Date().toISOString().split("T")[0];
         reportPage = 1;
         await loadReport();
+        showToast("Vale emitido correctamente", "success");
         window.open(`/print/${created.id}`, "_blank");
     } catch (error) {
         alert(error.message);
@@ -264,6 +305,7 @@ invoiceForm.addEventListener("submit", async (event) => {
         }
         resetInvoiceForm();
         await loadInvoices();
+        showToast("Factura mensual guardada", "success");
     } catch (error) {
         alert(error.message);
     }
@@ -304,6 +346,7 @@ vouchersTableBody.addEventListener("click", async (event) => {
             reportPage = reportTotalPages;
             await loadReport();
         }
+        showToast("Vale eliminado", "danger");
     } catch (error) {
         alert(error.message);
     }
@@ -345,6 +388,7 @@ invoicesTableBody.addEventListener("click", async (event) => {
                 invoicePage = invoiceTotalPages;
                 await loadInvoices();
             }
+            showToast("Factura eliminada", "danger");
         } catch (error) {
             alert(error.message);
         }
@@ -369,6 +413,58 @@ refreshBtn.addEventListener("click", async () => {
     try {
         await loadReport();
         await loadInvoices();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+voucherSearchInput.addEventListener("input", async (event) => {
+    reportSearch = event.target.value.trim();
+    reportPage = 1;
+    try {
+        await loadReport();
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+exportBtn.addEventListener("click", async () => {
+    try {
+        const month = reportMonthInput.value;
+        const query = new URLSearchParams({ month, page: "1", page_size: "1000" });
+        if (reportSearch) {
+            query.set("search", reportSearch);
+        }
+        const report = await api(`/api/reports/monthly?${query.toString()}`);
+        const rows = report.vouchers.map((voucher) => ({
+            serial_number: voucher.serial_number,
+            issue_date: voucher.issue_date,
+            employee_name: voucher.employee_name,
+            area: voucher.area,
+            vehicle_id: voucher.vehicle_id,
+            fuel_type: voucher.fuel_type,
+            liters: voucher.liters,
+            station: voucher.station,
+            notes: voucher.notes || "",
+        }));
+        const filename = `vales_${month}${reportSearch ? `_${reportSearch.replace(/\s+/g, "_")}` : ""}.xlsx`;
+        const blob = await fetch("/api/export/vouchers", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ month, search: reportSearch, filename }),
+        }).then((response) => {
+            if (!response.ok) {
+                throw new Error("No se pudo generar el Excel");
+            }
+            return response.blob();
+        });
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        link.click();
+        window.URL.revokeObjectURL(url);
+        showToast("Excel descargado", "success");
     } catch (error) {
         alert(error.message);
     }

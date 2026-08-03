@@ -141,7 +141,11 @@
     <section class="panel">
         <div class="table-header">
             <h2>Historial Mensual de Vales</h2>
-            <button id="refreshBtn" type="button" style="width: 200px;">Actualizar</button>
+            <div class="toolbar">
+                <input type="text" id="voucherSearchInput" placeholder="Buscar por responsable, area o vale" style="max-width: 260px;">
+                <button id="exportBtn" type="button" class="secondary-btn" style="width: auto;">Exportar Excel</button>
+                <button id="refreshBtn" type="button" style="width: 200px;">Actualizar</button>
+            </div>
         </div>
         <div class="table-wrap" style="margin-top: 14px;">
             <table>

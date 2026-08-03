@@ -140,11 +140,13 @@
 
     <section class="panel">
         <div class="table-header">
-            <h2>Historial Mensual de Vales</h2>
+            <div class="table-title-wrap">
+                <h2>Historial Mensual de Vales</h2>
+            </div>
             <div class="toolbar">
-                <input type="text" id="voucherSearchInput" placeholder="Buscar por responsable, area o vale" style="max-width: 260px;">
-                <button id="exportBtn" type="button" class="secondary-btn" style="width: auto;">Exportar Excel</button>
-                <button id="refreshBtn" type="button" style="width: 200px;">Actualizar</button>
+                <input type="text" id="voucherSearchInput" placeholder="Buscar" class="toolbar-search">
+                <button id="exportBtn" type="button" class="secondary-btn toolbar-btn">Excel</button>
+                <button id="refreshBtn" type="button" class="toolbar-btn">Actualizar</button>
             </div>
         </div>
         <div class="table-wrap" style="margin-top: 14px;">

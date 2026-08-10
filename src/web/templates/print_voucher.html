@@ -9,7 +9,6 @@
 
         :root {
             --sheet-margin: 14px;
-            --voucher-gap: var(--sheet-margin);
         }
 
         body {
@@ -37,13 +36,6 @@
             margin-bottom: 0;
             width: 100%;
             max-width: 700px;
-        }
-
-        .cut-line {
-            width: 100%;
-            max-width: 700px;
-            border-top: 1px dotted #c8c8c8;
-            margin: var(--voucher-gap) 0;
         }
 
         .voucher-header {
@@ -92,6 +84,15 @@
             font-size: 13px;
             white-space: nowrap;
             min-width: 100px;
+        }
+
+        .copy-mode {
+            margin-top: 2px;
+            font-size: 10px;
+            color: #374151;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
         }
 
         .obra-row {
@@ -198,10 +199,7 @@
 
             .print-actions { display: none; }
             body { padding: var(--sheet-margin); }
-            .voucher-copy,
-            .cut-line {
-                max-width: none;
-            }
+            .voucher-copy { max-width: none; }
             .voucher-copy { page-break-inside: avoid; }
         }
     </style>
@@ -214,11 +212,16 @@
 
 {% set FUEL_TYPES = ["NAFTA SUPER", "NAFTA INFINIA", "ULTRA DIESEL", "INFINIA DIESEL", "OTROS"] %}
 {% set vft = voucher.fuel_type | upper %}
-
-{% for copy in [("Original", true, "Firma Encargado de Combustible"), ("Duplicado", false, "Firma Responsable Planilla")] %}
-{% set copy_label = copy[0] %}
-{% set show_valid = copy[1] %}
-{% set sig_label  = copy[2] %}
+{% set is_internal = mode == "internal" %}
+{% if is_internal %}
+    {% set copy_label = "Copia de Control Interno" %}
+    {% set show_valid = false %}
+    {% set sig_label = "Firma Responsable Planilla" %}
+{% else %}
+    {% set copy_label = "Copia para Estacion de Servicio" %}
+    {% set show_valid = true %}
+    {% set sig_label = "Firma Encargado de Combustible" %}
+{% endif %}
 
 <section class="voucher-copy">
     <div class="voucher-header">
@@ -230,6 +233,7 @@
         </div>
         <div class="serial-area">Nº: {{ voucher.serial_number }}</div>
     </div>
+    <div class="copy-mode">{{ copy_label }}</div>
     <div class="obra-row">
         <div><span class="lbl">OBRA:</span> <span class="val">{{ voucher.area }}</span></div>
         <div><span class="lbl">FECHA:</span> <span class="val">{{ voucher.issue_date }}</span></div>
@@ -288,10 +292,6 @@
     </div>
 
 </section>
-{% if not loop.last %}
-<div class="cut-line" aria-hidden="true"></div>
-{% endif %}
-{% endfor %}
 
 </body>
 </html>

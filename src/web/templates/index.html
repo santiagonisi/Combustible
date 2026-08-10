@@ -92,7 +92,7 @@
                 <textarea name="notes" placeholder="Observaciones (opcional)"></textarea>
                 <button type="submit">Emitir vale y guardar</button>
             </form>
-            <p class="helper">Al emitir, se guarda en historial y se habilita impresion en dos copias. La cantidad queda a completar en estacion.</p>
+            <p class="helper">Al emitir, se imprime una sola copia para la estacion de servicio. La copia de control interno queda disponible en el historial para imprimir o descargar en PDF.</p>
         </section>
     </main>
 
@@ -172,7 +172,31 @@
             <button type="button" id="reportNextPageBtn" class="secondary-btn">Siguiente</button>
         </div>
     </section>
+
+    <section class="panel">
+        <div class="table-header">
+            <div class="table-title-wrap">
+                <h2>Control por Estacion de Servicio</h2>
+            </div>
+        </div>
+        <p class="helper" id="stationSummary">Sin datos para el mes seleccionado.</p>
+        <div id="stationChart" class="station-chart" aria-label="Grafico por estacion"></div>
+        <div class="table-wrap" style="margin-top: 14px;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Estacion</th>
+                        <th>Vales</th>
+                        <th>Litros</th>
+                        <th>Promedio por vale</th>
+                        <th>Participacion</th>
+                    </tr>
+                </thead>
+                <tbody id="stationsTableBody"></tbody>
+            </table>
+        </div>
+    </section>
 </div>
 
-<script src="/static/js/app.js?v=20260504k"></script>
+<script src="/static/js/app.js?v=20260810b"></script>
 {% endblock %}

@@ -23,6 +23,9 @@ const reportPageInfo = document.getElementById("reportPageInfo");
 const invoicePrevPageBtn = document.getElementById("invoicePrevPageBtn");
 const invoiceNextPageBtn = document.getElementById("invoiceNextPageBtn");
 const invoicePageInfo = document.getElementById("invoicePageInfo");
+const stationSummary = document.getElementById("stationSummary");
+const stationChart = document.getElementById("stationChart");
+const stationsTableBody = document.getElementById("stationsTableBody");
 
 let vehicles = [];
 let editingInvoiceId = null;
@@ -34,6 +37,44 @@ let invoicePage = 1;
 let invoiceTotalPages = 1;
 const INVOICE_PAGE_SIZE = 10;
 let currentInvoiceItems = [];
+
+function setStationRows(report) {
+    stationsTableBody.innerHTML = "";
+    stationChart.innerHTML = "";
+
+    if (!report.stations.length) {
+        stationSummary.textContent = "Sin datos para el mes seleccionado.";
+        stationChart.innerHTML = '<div class="station-empty">No hay cargas registradas para este mes.</div>';
+        stationsTableBody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:24px;color:#64748b;">No hay estaciones con vales en este mes.</td></tr>';
+        return;
+    }
+
+    const stationCount = report.stations.length;
+    stationSummary.textContent = `Estaciones: ${stationCount} | Vales: ${report.total_vouchers} | Litros: ${Number(report.total_liters).toFixed(2)} L`;
+
+    report.stations.forEach((station) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${station.station}</td>
+            <td>${station.total_vouchers}</td>
+            <td>${Number(station.total_liters).toFixed(2)} L</td>
+            <td>${Number(station.avg_liters_per_voucher).toFixed(2)} L</td>
+            <td>${Number(station.share_percent).toFixed(2)}%</td>
+        `;
+        stationsTableBody.appendChild(tr);
+
+        const row = document.createElement("div");
+        row.className = "station-bar-row";
+        row.innerHTML = `
+            <div class="station-bar-label" title="${station.station}">${station.station}</div>
+            <div class="station-bar-track">
+                <div class="station-bar-fill" style="width:${Math.max(2, Number(station.share_percent))}%"></div>
+            </div>
+            <div class="station-bar-value">${Number(station.share_percent).toFixed(2)}%</div>
+        `;
+        stationChart.appendChild(row);
+    });
+}
 
 function currentMonthValue() {
     const now = new Date();
@@ -108,7 +149,9 @@ function setVoucherRows(items) {
             <td>${voucher.fuel_type}</td>
             <td>${vehicle ? `${vehicle.code} / ${vehicle.plate}` : voucher.vehicle_id}</td>
             <td style="text-align:center">
-                <button type="button" class="table-action danger icon-btn" onclick="window.open('/print/${voucher.id}','_blank')" title="Imprimir" style="margin:0;background:#15803d;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+                <button type="button" class="table-action icon-btn" data-action="print-station" data-id="${voucher.id}" title="Imprimir copia estacion" style="margin:0;background:#15803d;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+                <button type="button" class="table-action icon-btn" data-action="print-internal" data-id="${voucher.id}" title="Imprimir control interno" style="margin:0;background:#334155;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
+                <button type="button" class="table-action icon-btn" data-action="download-internal" data-id="${voucher.id}" title="Descargar PDF control interno" style="margin:0;background:#1d4ed8;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
                 <button type="button" class="table-action danger icon-btn" data-action="delete-voucher" data-id="${voucher.id}" title="Eliminar" style="margin:0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
             </td>
         `;
@@ -219,6 +262,12 @@ async function loadInvoices() {
     const month = reportMonthInput.value;
     const summary = await api(`/api/monthly-invoices?month=${month}&page=${invoicePage}&page_size=${INVOICE_PAGE_SIZE}`);
     setInvoiceRows(summary);
+}
+
+async function loadStationBreakdown() {
+    const month = reportMonthInput.value;
+    const report = await api(`/api/reports/stations?month=${month}`);
+    setStationRows(report);
 }
 
 const litersInput = document.getElementById("litersInput");
@@ -336,7 +385,24 @@ vouchersTableBody.addEventListener("click", async (event) => {
     if (!target) return;
     const action = target.dataset.action;
     const id = Number(target.dataset.id);
-    if (action !== "delete-voucher" || !id) return;
+    if (!id) return;
+
+    if (action === "print-station") {
+        window.open(`/print/${id}`, "_blank");
+        return;
+    }
+
+    if (action === "print-internal") {
+        window.open(`/print/${id}?mode=internal`, "_blank");
+        return;
+    }
+
+    if (action === "download-internal") {
+        window.open(`/print/${id}?mode=internal&format=pdf&download=true`, "_blank");
+        return;
+    }
+
+    if (action !== "delete-voucher") return;
     const confirmed = window.confirm("Se eliminara el vale seleccionado. Continuar?");
     if (!confirmed) return;
     try {
@@ -404,6 +470,7 @@ reportMonthInput.addEventListener("change", async () => {
     try {
         await loadReport();
         await loadInvoices();
+        await loadStationBreakdown();
     } catch (error) {
         alert(error.message);
     }
@@ -413,6 +480,7 @@ refreshBtn.addEventListener("click", async () => {
     try {
         await loadReport();
         await loadInvoices();
+        await loadStationBreakdown();
     } catch (error) {
         alert(error.message);
     }
@@ -518,6 +586,7 @@ invoiceNextPageBtn.addEventListener("click", async () => {
         await loadVehicles();
         await loadReport();
         await loadInvoices();
+        await loadStationBreakdown();
     } catch (error) {
         alert(error.message);
     }

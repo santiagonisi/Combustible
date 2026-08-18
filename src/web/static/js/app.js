@@ -365,8 +365,8 @@ invoiceCancelEditBtn.addEventListener("click", () => {
 });
 
 vehiclesTableBody.addEventListener("click", async (event) => {
-    const target = event.target;
-    if (!(target instanceof HTMLElement)) return;
+    const target = event.target.closest("[data-action]");
+    if (!target) return;
     const action = target.dataset.action;
     const id = Number(target.dataset.id);
     if (action !== "delete-vehicle" || !id) return;

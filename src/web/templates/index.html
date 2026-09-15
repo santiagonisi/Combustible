@@ -65,6 +65,35 @@
         </section>
 
         <section class="panel">
+            <h2>Estaciones de Servicio</h2>
+            <form id="stationForm" class="form-grid form-vehicle">
+                <input name="name" placeholder="Nombre de la estacion" required>
+                <input name="cuit" placeholder="CUIT" minlength="11" maxlength="13" required>
+                <input name="address" placeholder="Direccion" required>
+                <input name="contact" placeholder="Contacto (opcional)">
+                <input name="current_account" placeholder="Cuenta corriente (opcional)">
+                <div class="field-full invoice-actions">
+                    <button type="submit" id="stationSubmitBtn">Guardar estacion</button>
+                    <button type="button" id="stationCancelEditBtn" class="secondary-btn" style="display:none;">Cancelar edicion</button>
+                </div>
+            </form>
+            <div class="table-wrap small">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>CUIT</th>
+                            <th>Direccion</th>
+                            <th>Estado</th>
+                            <th style="text-align:center">Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stationsCatalogTableBody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <section class="panel">
             <h2>Emision de Vale</h2>
             <p class="panel-lead">Completá los datos del responsable y vehiculo para emitir el vale.</p>
             <form id="voucherForm" class="form-grid form-voucher">
@@ -88,7 +117,9 @@
                         <input type="checkbox" id="litersCompletarCheck"> A completar en estacion
                     </label>
                 </div>
-                <input name="station" placeholder="Estacion de servicio" required>
+                <select name="station" id="stationSelect" required>
+                    <option value="">Seleccionar estacion de servicio</option>
+                </select>
                 <textarea name="notes" placeholder="Observaciones (opcional)"></textarea>
                 <button type="submit">Emitir vale y guardar</button>
             </form>

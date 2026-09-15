@@ -1,6 +1,7 @@
 const reportMonthInput = document.getElementById("reportMonth");
 const invoiceMonthInput = document.getElementById("invoiceMonth");
 const vehicleForm = document.getElementById("vehicleForm");
+const stationForm = document.getElementById("stationForm");
 const voucherForm = document.getElementById("voucherForm");
 const invoiceForm = document.getElementById("invoiceForm");
 const invoiceSubmitBtn = document.getElementById("invoiceSubmitBtn");
@@ -9,6 +10,7 @@ const vehiclesTableBody = document.getElementById("vehiclesTableBody");
 const vouchersTableBody = document.getElementById("vouchersTableBody");
 const invoicesTableBody = document.getElementById("invoicesTableBody");
 const vehicleSelect = document.getElementById("vehicleSelect");
+const stationSelect = document.getElementById("stationSelect");
 const fuelTypeSelect = document.getElementById("fuelTypeSelect");
 const totalVouchers = document.getElementById("totalVouchers");
 const invoiceLiters = document.getElementById("invoiceLiters");
@@ -26,8 +28,13 @@ const invoicePageInfo = document.getElementById("invoicePageInfo");
 const stationSummary = document.getElementById("stationSummary");
 const stationChart = document.getElementById("stationChart");
 const stationsTableBody = document.getElementById("stationsTableBody");
+const stationsCatalogTableBody = document.getElementById("stationsCatalogTableBody");
+const stationSubmitBtn = document.getElementById("stationSubmitBtn");
+const stationCancelEditBtn = document.getElementById("stationCancelEditBtn");
 
 let vehicles = [];
+let stations = [];
+let editingStationId = null;
 let editingInvoiceId = null;
 let reportPage = 1;
 let reportTotalPages = 1;
@@ -37,6 +44,33 @@ let invoicePage = 1;
 let invoiceTotalPages = 1;
 const INVOICE_PAGE_SIZE = 10;
 let currentInvoiceItems = [];
+
+function setStationCatalogRows(items) {
+    stationsCatalogTableBody.innerHTML = "";
+    stationSelect.innerHTML = '<option value="">Seleccionar estacion de servicio</option>';
+
+    items.forEach((station) => {
+        if (station.active) {
+            const option = document.createElement("option");
+            option.value = station.name;
+            option.textContent = station.name;
+            stationSelect.appendChild(option);
+        }
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${station.name}</td>
+            <td>${station.cuit}</td>
+            <td>${station.address}</td>
+            <td>${station.active ? "Activa" : "Desactivada"}</td>
+            <td style="text-align:center">
+                <button type="button" class="table-action" data-action="edit-station" data-id="${station.id}">Editar</button>
+                <button type="button" class="table-action ${station.active ? "danger" : ""}" data-action="toggle-station" data-id="${station.id}">${station.active ? "Desactivar" : "Activar"}</button>
+            </td>
+        `;
+        stationsCatalogTableBody.appendChild(tr);
+    });
+}
 
 function setStationRows(report) {
     stationsTableBody.innerHTML = "";
@@ -239,6 +273,11 @@ async function loadVehicles() {
     setVehicleRows(vehicles);
 }
 
+async function loadStations() {
+    stations = await api("/api/stations");
+    setStationCatalogRows(stations);
+}
+
 async function loadReport() {
     const month = reportMonthInput.value;
     const query = new URLSearchParams({
@@ -303,6 +342,79 @@ vehicleForm.addEventListener("submit", async (event) => {
         vehicleForm.reset();
         await loadVehicles();
         showToast("Vehiculo guardado", "success");
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+function resetStationForm() {
+    editingStationId = null;
+    stationForm.reset();
+    stationSubmitBtn.textContent = "Guardar estacion";
+    stationCancelEditBtn.style.display = "none";
+}
+
+function populateStationForm(station) {
+    editingStationId = station.id;
+    stationForm.name.value = station.name;
+    stationForm.cuit.value = station.cuit;
+    stationForm.address.value = station.address;
+    stationForm.contact.value = station.contact || "";
+    stationForm.current_account.value = station.current_account || "";
+    stationSubmitBtn.textContent = "Actualizar estacion";
+    stationCancelEditBtn.style.display = "block";
+}
+
+stationForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const payload = Object.fromEntries(new FormData(stationForm).entries());
+    const editingStation = stations.find((station) => station.id === editingStationId);
+    payload.active = editingStation ? editingStation.active : true;
+    try {
+        await api(editingStationId ? `/api/stations/${editingStationId}` : "/api/stations", {
+            method: editingStationId ? "PUT" : "POST",
+            body: JSON.stringify(payload),
+        });
+        resetStationForm();
+        await loadStations();
+        showToast("Estacion guardada", "success");
+    } catch (error) {
+        alert(error.message);
+    }
+});
+
+stationCancelEditBtn.addEventListener("click", resetStationForm);
+
+stationsCatalogTableBody.addEventListener("click", async (event) => {
+    const target = event.target.closest("[data-action]");
+    if (!target) return;
+    const stationId = Number(target.dataset.id);
+    const station = stations.find((item) => item.id === stationId);
+    if (!station) return;
+
+    if (target.dataset.action === "edit-station") {
+        populateStationForm(station);
+        return;
+    }
+
+    if (target.dataset.action !== "toggle-station") return;
+    const action = station.active ? "desactivar" : "activar";
+    if (!window.confirm(`Se va a ${action} la estacion seleccionada. Continuar?`)) return;
+    try {
+        await api(`/api/stations/${station.id}`, {
+            method: "PUT",
+            body: JSON.stringify({
+                name: station.name,
+                cuit: station.cuit,
+                address: station.address,
+                contact: station.contact || "",
+                current_account: station.current_account || "",
+                active: !station.active,
+            }),
+        });
+        if (editingStationId === station.id) resetStationForm();
+        await loadStations();
+        showToast(`Estacion ${station.active ? "desactivada" : "activada"}`, "success");
     } catch (error) {
         alert(error.message);
     }
@@ -611,6 +723,7 @@ invoiceNextPageBtn.addEventListener("click", async () => {
     voucherForm.issue_date.value = new Date().toISOString().split("T")[0];
     try {
         await loadVehicles();
+        await loadStations();
         await loadReport();
         await loadInvoices();
         await loadStationBreakdown();

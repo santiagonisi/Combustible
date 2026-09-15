@@ -3,6 +3,7 @@ from datetime import date
 from sqlalchemy import and_, func
 from sqlalchemy.orm import Session
 
+from src.models.station import Station
 from src.models.vehicle import Vehicle
 from src.models.voucher import Voucher
 from src.schemas.voucher import VoucherCreate, VoucherUpdate
@@ -63,6 +64,10 @@ def create_voucher(db: Session, payload: VoucherCreate) -> Voucher:
     vehicle = db.query(Vehicle).filter(Vehicle.id == payload.vehicle_id, Vehicle.active.is_(True)).first()
     if not vehicle:
         raise ValueError("El vehiculo seleccionado no existe o esta inactivo")
+
+    station = db.query(Station).filter(Station.name == payload.station, Station.active.is_(True)).first()
+    if not station:
+        raise ValueError("La estacion seleccionada no existe o esta inactiva")
 
     serial = _serial_for_month(db, payload.issue_date)
     data = payload.model_dump()

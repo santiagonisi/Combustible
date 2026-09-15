@@ -152,6 +152,7 @@ function setVoucherRows(items) {
                 <button type="button" class="table-action icon-btn" data-action="print-station" data-id="${voucher.id}" title="Imprimir copia estacion" style="margin:0;background:#15803d;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
                 <button type="button" class="table-action icon-btn" data-action="print-internal" data-id="${voucher.id}" title="Imprimir control interno" style="margin:0;background:#334155;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg></button>
                 <button type="button" class="table-action icon-btn" data-action="download-internal" data-id="${voucher.id}" title="Descargar PDF control interno" style="margin:0;background:#1d4ed8;"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></button>
+                <button type="button" class="table-action" data-action="edit-voucher-liters" data-id="${voucher.id}" title="Completar o editar litros" style="margin:0;">Editar litros</button>
                 <button type="button" class="table-action danger icon-btn" data-action="delete-voucher" data-id="${voucher.id}" title="Eliminar" style="margin:0"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
             </td>
         `;
@@ -386,6 +387,32 @@ vouchersTableBody.addEventListener("click", async (event) => {
     const action = target.dataset.action;
     const id = Number(target.dataset.id);
     if (!id) return;
+
+    if (action === "edit-voucher-liters") {
+        const currentVoucher = target.closest("tr");
+        const currentQuantity = currentVoucher?.querySelector("td:nth-child(5)")?.textContent.trim() || "";
+        const enteredLiters = window.prompt("Indica cuantos litros se cargaron:", currentQuantity.includes("A completar") ? "" : currentQuantity.replace(" L", ""));
+        if (enteredLiters === null) return;
+
+        const liters = Number(enteredLiters.replace(",", "."));
+        if (!Number.isFinite(liters) || liters < 0) {
+            alert("Ingresa una cantidad de litros valida.");
+            return;
+        }
+
+        try {
+            await api(`/api/vouchers/${id}`, {
+                method: "PATCH",
+                body: JSON.stringify({ liters }),
+            });
+            await loadReport();
+            await loadStationBreakdown();
+            showToast("Litros del vale actualizados", "success");
+        } catch (error) {
+            alert(error.message);
+        }
+        return;
+    }
 
     if (action === "print-station") {
         window.open(`/print/${id}`, "_blank");

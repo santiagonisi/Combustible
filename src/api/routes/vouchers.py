@@ -2,8 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
 from src.db.database import get_db
-from src.schemas.voucher import VoucherCreate, VoucherRead
-from src.services.voucher_service import create_voucher, delete_voucher, list_vouchers_by_month, normalize_voucher_payload
+from src.schemas.voucher import VoucherCreate, VoucherRead, VoucherUpdate
+from src.services.voucher_service import (
+    create_voucher,
+    delete_voucher,
+    list_vouchers_by_month,
+    normalize_voucher_payload,
+    update_voucher_liters,
+)
 
 
 router = APIRouter(prefix="/api/vouchers", tags=["vouchers"])
@@ -30,3 +36,11 @@ def remove_voucher(voucher_id: int, db: Session = Depends(get_db)):
     result = delete_voucher(db, voucher_id)
     if result is None:
         raise HTTPException(status_code=404, detail="Vale no encontrado")
+
+
+@router.patch("/{voucher_id}", response_model=VoucherRead)
+def patch_voucher(voucher_id: int, payload: VoucherUpdate, db: Session = Depends(get_db)):
+    result = update_voucher_liters(db, voucher_id, payload)
+    if result is None:
+        raise HTTPException(status_code=404, detail="Vale no encontrado")
+    return result

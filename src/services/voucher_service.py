@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from src.models.vehicle import Vehicle
 from src.models.voucher import Voucher
-from src.schemas.voucher import VoucherCreate
+from src.schemas.voucher import VoucherCreate, VoucherUpdate
 
 
 def normalize_voucher_payload(payload: dict) -> dict:
@@ -127,4 +127,15 @@ def delete_voucher(db: Session, voucher_id: int) -> Voucher | None:
         return None
     db.delete(voucher)
     db.commit()
+    return voucher
+
+
+def update_voucher_liters(db: Session, voucher_id: int, payload: VoucherUpdate) -> Voucher | None:
+    voucher = db.query(Voucher).filter(Voucher.id == voucher_id).first()
+    if not voucher:
+        return None
+
+    voucher.liters = payload.liters
+    db.commit()
+    db.refresh(voucher)
     return voucher

@@ -14,6 +14,10 @@ class VoucherCreate(BaseModel):
     notes: str | None = Field(default="", max_length=300)
 
 
+class VoucherUpdate(BaseModel):
+    liters: float = Field(ge=0)
+
+
 class VoucherRead(BaseModel):
     id: int
     serial_number: str

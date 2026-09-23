@@ -93,7 +93,7 @@
             </div>
         </section>
 
-        <section class="panel">
+        <section class="panel voucher-panel">
             <h2>Emision de Vale</h2>
             <p class="panel-lead">Completá los datos del responsable y vehiculo para emitir el vale.</p>
             <form id="voucherForm" class="form-grid form-voucher">
@@ -111,13 +111,13 @@
                     <option value="Diesel Infinia">Diesel Infinia</option>
                     <option value="Otros">Otros</option>
                 </select>
-                <div id="litersWrapper" class="field-full liters-row">
+                <div id="litersWrapper" class="liters-row">
                     <input type="number" id="litersInput" name="liters" min="0" step="0.01" placeholder="Cantidad de litros">
                     <label class="liters-check">
                         <input type="checkbox" id="litersCompletarCheck"> A completar en estacion
                     </label>
                 </div>
-                <select name="station" id="stationSelect" required>
+                <select name="station" id="stationSelect" class="field-full" required>
                     <option value="">Seleccionar estacion de servicio</option>
                 </select>
                 <textarea name="notes" placeholder="Observaciones (opcional)"></textarea>
@@ -187,7 +187,7 @@
                         <th>Nro Vale</th>
                         <th>Fecha</th>
                         <th>Persona</th>
-                        <th>Area</th>
+                        <th>Area</th>                                                       
                         <th>Cantidad</th>
                         <th>Combustible</th>
                         <th>Vehiculo</th>
@@ -229,5 +229,5 @@
     </section>
 </div>
 
-<script src="/static/js/app.js?v=20260915a"></script>
+<script src="/static/js/app.js?v=20260923b"></script>
 {% endblock %}

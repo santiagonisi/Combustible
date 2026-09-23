@@ -116,6 +116,15 @@ body {
     gap: 14px;
 }
 
+.voucher-panel {
+    grid-column: 1 / -1;
+    width: 100%;
+}
+
+.voucher-panel .form-voucher {
+    width: 100%;
+}
+
 .panel {
     background: var(--panel);
     border: 1px solid #d8deea;
